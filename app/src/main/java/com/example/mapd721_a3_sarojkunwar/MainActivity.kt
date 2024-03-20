@@ -9,8 +9,10 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -20,16 +22,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
@@ -113,16 +119,48 @@ fun Rocket(navController: NavController){
 }
 
 @Composable
-fun Scale(navController: NavController){
+fun Scale(navController: NavController, modifier: Modifier = Modifier) {
     BoxWithConstraints(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = Color.Black)
-    ){
+    ) {
+        var isScaled by remember { mutableStateOf(false) }
+        val transition = updateTransition(targetState = isScaled, label = "scale")
 
+        val scale by transition.animateFloat(
+            transitionSpec = {
+                tween(durationMillis = if (targetState) 4000 else 3800)
+            },
+            label = "scale factor"
+        ) { targetState ->
+            if (targetState) 1.5f else 1f
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize(Alignment.Center)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.bat),
+                contentDescription = "Image",
+                modifier = Modifier
+                    .size(150.dp)
+                    .scale(scale)
+                    .clickable(onClick = { isScaled = !isScaled })
+            )
+            Button(
+                onClick = { isScaled = !isScaled },
+                modifier = Modifier.padding(top = 20.dp)
+            ) {
+                Text(text = if (isScaled) "Shrink Image" else "Scale Image")
+            }
+        }
     }
-
 }
+
+
 @Composable
 fun Clock(navController: NavController){
     BoxWithConstraints(
