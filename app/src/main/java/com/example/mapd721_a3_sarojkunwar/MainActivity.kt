@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -14,6 +15,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,12 +32,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -67,8 +73,8 @@ class MainActivity : ComponentActivity() {
                         composable("exitanimation") {
                             ExitAnimation(navController = navController)
                         }
-                        composable("clock") {
-                            Clock(navController = navController)
+                        composable("fan") {
+                            Fan(navController = navController)
                         }
                         composable("scale") {
                             Scale(navController = navController)
@@ -92,7 +98,7 @@ fun StartComposable(navController: NavController){
     ){
         MyButton(text = "Transition Button", onClick = { navController.navigate("rocket") })
         MyButton(text = "Scale Button", onClick = { navController.navigate("scale") })
-        MyButton(text = "Infinite Button", onClick = { navController.navigate("clock") })
+        MyButton(text = "Infinite Button", onClick = { navController.navigate("fan") })
         MyButton(text = "Enter and Exit Button", onClick = { navController.navigate("exitanimation") })
     }
 }
@@ -162,15 +168,34 @@ fun Scale(navController: NavController, modifier: Modifier = Modifier) {
 
 
 @Composable
-fun Clock(navController: NavController){
-    BoxWithConstraints(
+fun Fan(navController: NavController) {
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color.Black)
-    ){
+    ) {
+         // Track current rotation
+        val infiniteTransition = rememberInfiniteTransition()
+        val angle by infiniteTransition.animateFloat(
+            initialValue = 0F,
+            targetValue = 360F,
+            animationSpec = infiniteRepeatable(
+                animation = tween(2000, easing = LinearEasing)
+            )
+        )
 
+        Image(
+            painter = painterResource(id = R.drawable.blade),
+            contentDescription = "fan",
+            modifier = Modifier
+                .fillMaxSize()
+                .rotate(angle)
+                .align(Alignment.Center)
+        )
     }
 }
+
+
 @Composable
 fun ExitAnimation(navController: NavController){
     BoxWithConstraints(
